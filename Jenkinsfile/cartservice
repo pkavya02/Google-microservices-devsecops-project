@@ -134,14 +134,17 @@ pipeline {
         // --- Trivy Image Scan ---
         stage("Trivy Scan Image") {
             steps {
+                dir('src/cartservice') {
                 sh '''
                 trivy image -f json -o trivy-image-cart.json ${IMAGE_TAG}
                 trivy image -f table -o trivy-image-cart.txt ${IMAGE_TAG}
                 '''
             }
+            }
             post {
                 always {
-                    archiveArtifacts 'src/cartservice/trivy-image-cart.*'
+                    archiveArtifacts 'src/cartservice/trivy-image-cart.txt'
+                    archiveArtifacts 'src/cartservice/trivy-image-cart.json'
                 }
             }
         }
