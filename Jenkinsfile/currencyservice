@@ -73,8 +73,8 @@ pipeline {
             }
         }
 
-        // --- Dependency Scan (Snyk) ---
-        stage("Snyk Scan") {
+        // --- Dependency Scan (Snyk CLI Test) ---
+        stage("Snyk Scan (CLI)") {
             steps {
                 dir('src/currencyservice') {
                     withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
@@ -83,7 +83,7 @@ pipeline {
                           npm install -g snyk
                         fi
 
-                        echo "Running Snyk test..."
+                        echo "Running Snyk CLI test..."
                         snyk auth $SNYK_TOKEN
                         snyk test --severity-threshold=high || true
                         '''
@@ -92,20 +92,17 @@ pipeline {
             }
         }
         
-        // --- Dependency Scan (Snyk Test) ---
-        stage("Snyk Test") {
+        // 🛠️ FIX APPLIED HERE: Consolidated Snyk Test & Monitor using the plugin step
+        stage("Snyk Test & Monitor (Plugin)") {
             steps {
                 dir('src/currencyservice') {
-                    snykSecurity failOnIssues: true, snykInstallation: 'Default', snykTokenId: 'snyk-token'
-                }
-            }
-        }
-
-        // --- Snyk Monitor (send snapshot to dashboard) ---
-        stage("Snyk Monitor") {
-            steps {
-                dir('src/currencyservice') {
-                    snykSecurity command: 'monitor', snykInstallation: 'Default', snykTokenId: 'snyk-token'
+                    snykSecurity(
+                        failOnIssues: true, 
+                        snykInstallation: 'Default', 
+                        snykTokenId: 'snyk-token',
+                        // This parameter enables the 'monitor' functionality alongside the 'test'
+                        monitorProjectOnBuild: true 
+                    )
                 }
             }
         }
