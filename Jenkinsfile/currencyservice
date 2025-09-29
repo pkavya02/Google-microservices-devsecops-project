@@ -2,9 +2,10 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node16'   // Make sure Node.js 16 or higher is configured in Jenkins global tools
+        jdk 'jdk17'
+        nodejs 'node16'
     }
-
+    
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_NAME  = 'harishnshetty/currencyservice'
