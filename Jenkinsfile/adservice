@@ -3,10 +3,11 @@ pipeline {
 
     tools {
         jdk 'jdk21'
+        
     }
 
     environment {
-
+        
         DOCKER_NAME  = 'harishnshetty/adservice'
         IMAGE_NAME   = 'adservice'
     }
@@ -22,6 +23,36 @@ pipeline {
             }
         }
 
+        // --- SAST: SonarQube with Gradle (non-blocking) ---
+        // stage("SonarQube Analysis") {
+        //     steps {
+        //         dir('src/adservice') {
+        //             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  // <--- make non-blocking
+        //                 sh 'chmod +x gradlew'
+        //                 withSonarQubeEnv('sonar-server') {
+        //                     sh '''
+        //                         ./gradlew sonarqube \
+        //                         -Dsonar.projectKey=adservice \
+        //                         -Dsonar.projectName=adservice \
+        //                         -Dsonar.host.url=$SONAR_HOST_URL \
+        //                         -Dsonar.login=$SONAR_AUTH_TOKEN
+        //                     '''
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        // // --- Quality Gate ---
+        // stage("Quality Gate") {
+        //     steps {
+        //         script {
+        //             timeout(time: 3, unit: 'MINUTES') {
+        //                 waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
+        //             }
+        //         }
+        //     }
+        // }
 
 
         // --- Trivy FS Scan ---
@@ -71,22 +102,22 @@ pipeline {
         }
 
         // --- Trivy Image Scan ---
-    //     stage("Trivy Scan Image") {
-    //         steps {
-    //             dir('src/adservice') {
-    //                 sh '''
-    //                 trivy image -f json -o trivy-image-ad.json ${IMAGE_TAG}
-    //                 trivy image -f table -o trivy-image-ad.txt ${IMAGE_TAG}
-    //                 '''
-    //             }
-    //         }
-    //         post {
-    //             always {
-    //                 archiveArtifacts 'src/adservice/trivy-image-ad.*'
-    //             }
-    //         }
-    //     }
-    // }
+        // stage("Trivy Scan Image") {
+        //     steps {
+        //         dir('src/adservice') {
+        //             sh '''
+        //             trivy image -f json -o trivy-image-ad.json ${IMAGE_TAG}
+        //             trivy image -f table -o trivy-image-ad.txt ${IMAGE_TAG}
+        //             '''
+        //         }
+        //     }
+        //     post {
+        //         always {
+        //             archiveArtifacts 'src/adservice/trivy-image-ad.*'
+        //         }
+        //     }
+        // }
+    }
 
     // --- Final Notifications ---
     post {
