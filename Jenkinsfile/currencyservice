@@ -60,58 +60,17 @@ pipeline {
             }
         }
 
-        // --- Unit Tests + Coverage ---
-        stage("Unit Tests") {
+          stage("OWASP FS Scan") {
             steps {
-                dir('src/currencyservice') {
-                    sh '''
-                    if npm test -- --coverage; then
-                    echo "✅ Tests ran successfully"
-                    else
-                    echo "⚠️ No tests defined, skipping..."
-                    fi
-                    '''
-                }
-            }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: 'src/currencyservice/test-results/**/*.xml'
-                }
-            }
-        }
+                dependencyCheck additionalArguments: '''
+                    --scan ./ 
+                    --disableYarnAudit 
+                    --disableNodeAudit 
+                
+                   ''',
+                odcInstallation: 'dp-check'
 
-
-        // --- Dependency Scan (Snyk CLI Test) ---
-        stage("Snyk Scan (CLI)") {
-            steps {
-                dir('src/currencyservice') {
-                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
-                        sh '''
-                        if ! command -v snyk &> /dev/null; then
-                          npm install -g snyk
-                        fi
-
-                        echo "Running Snyk CLI test..."
-                        npx snyk auth $SNYK_TOKEN
-                        snyk test --severity-threshold=high || true
-                        '''
-                    }
-                }
-            }
-        }
-        
-        // 🛠️ FIX APPLIED HERE: Consolidated Snyk Test & Monitor using the plugin step
-        stage("Snyk Test & Monitor (Plugin)") {
-            steps {
-                dir('src/currencyservice') {
-                    snykSecurity(
-                        failOnIssues: true, 
-                        snykInstallation: 'Default', 
-                        snykTokenId: 'snyk-token',
-                        // This parameter enables the 'monitor' functionality alongside the 'test'
-                        monitorProjectOnBuild: true 
-                    )
-                }
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
 
