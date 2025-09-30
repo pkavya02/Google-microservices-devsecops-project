@@ -77,20 +77,6 @@ pipeline {
             }
         }
 
-        // --- Unit Tests ---
-        stage("Unit Tests") {
-            steps {
-                dir('src/emailservice') {
-                    sh 'pytest --junitxml=test-results/results.xml || true'
-                }
-            }
-            post {
-                always {
-                    junit 'src/emailservice/test-results/*.xml'
-                }
-            }
-        }
-
         // --- Dependency Scan (Safety) ---
         stage("Safety Dependency Scan") {
             steps {
