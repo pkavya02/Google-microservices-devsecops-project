@@ -550,7 +550,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: server
-        image: adijaiswal/shippingservice:latest
+        image: harishnshetty/shippingservice:2
         ports:
         - containerPort: 50051
         env:
