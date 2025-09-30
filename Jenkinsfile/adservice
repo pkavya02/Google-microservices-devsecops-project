@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk17'          // Java 17 configured in Jenkins global tools
-        gradle 'gradle7'     // Gradle installed in Jenkins global tools (example name: gradle7)
+        jdk 'jdk21'          // Java 17 configured in Jenkins global tools
+        gradle 'gradle9'     // Gradle installed in Jenkins global tools (example name: gradle7)
     }
 
     environment {
