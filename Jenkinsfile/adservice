@@ -27,18 +27,20 @@ pipeline {
         stage("SonarQube Analysis") {
             steps {
                 dir('src/adservice') {
+                    sh 'chmod +x gradlew'   // <--- add this line
                     withSonarQubeEnv('sonar-server') {
                         sh '''
-                        ./gradlew sonarqube \
-                          -Dsonar.projectKey=adservice \
-                          -Dsonar.projectName=adservice \
-                          -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                            ./gradlew sonarqube \
+                            -Dsonar.projectKey=adservice \
+                            -Dsonar.projectName=adservice \
+                            -Dsonar.host.url=$SONAR_HOST_URL \
+                            -Dsonar.login=$SONAR_AUTH_TOKEN
                         '''
                     }
                 }
             }
         }
+
 
         // --- Quality Gate ---
         stage("Quality Gate") {
