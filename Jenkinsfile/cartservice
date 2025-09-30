@@ -44,21 +44,14 @@ pipeline {
         // --- Quality Gate ---
         stage("Quality Gate") {
             steps {
-                dir('src/cartservice') {
-                    script {
-                        timeout(time: 3, unit: 'MINUTES') {
-                            try {
-                                waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
-                            } catch (Exception e) {
-                                echo "Quality Gate failed but continuing for development: ${e.message}"
-                                // Uncomment below line to make it non-blocking
-                                // currentBuild.result = 'UNSTABLE'
-                            }
-                        }
+                script {
+                    timeout(time: 3, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
                     }
                 }
             }
         }
+
         // --- Build & Unit Tests ---
         stage("Build & Test") {
             steps {
@@ -185,4 +178,4 @@ pipeline {
             }
         }
     }
-} 
+}
