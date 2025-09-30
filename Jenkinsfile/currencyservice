@@ -62,6 +62,7 @@ pipeline {
 
           stage("OWASP FS Scan") {
             steps {
+                dir('src/currencyservice') {
                 dependencyCheck additionalArguments: '''
                     --scan ./ 
                     --disableYarnAudit 
@@ -73,6 +74,12 @@ pipeline {
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
+                    post {
+                always {
+                    archiveArtifacts 'src/currencyservice/dependency-check-report.xml'
+                }
+            }
+          }
 
         // --- Trivy FS Scan ---
         stage("Trivy File Scan") {
@@ -160,7 +167,7 @@ pipeline {
                         to: 'harishn662@gmail.com',
                         from: 'harishn662@gmail.com',
                         mimeType: 'text/html',
-                        attachmentsPattern: 'trivy-fs-report.txt,trivy-image-currency.json,trivy-image-currency.txt'
+                        attachmentsPattern: 'trivy-fs-report.txt,trivy-image-currency.json,trivy-image-currency.txt,dependency-check-report.xml'
                     )
                 }
             }
