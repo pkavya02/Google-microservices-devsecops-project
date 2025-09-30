@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        python 'python3.10'   // <-- configure this in Jenkins Global Tool Config
+        jdk 'jdk17'
     }
 
     environment {
@@ -22,13 +22,13 @@ pipeline {
             }
         }
 
-        // --- SAST: Bandit ---
+        // --- Bandit (Python SAST) ---
         stage("Bandit Security Scan") {
             steps {
                 dir('src/emailservice') {
                     sh '''
                     python3 -m pip install --upgrade pip
-                    pip install --quiet bandit
+                    pip3 install bandit
                     bandit -r . -f json -o bandit-report.json || true
                     '''
                 }
@@ -40,7 +40,7 @@ pipeline {
             }
         }
 
-        // --- SAST: SonarQube for Python ---
+        // --- SonarQube Analysis ---
         stage("SonarQube Analysis") {
             steps {
                 dir('src/emailservice') {
@@ -68,11 +68,11 @@ pipeline {
             }
         }
 
-        // --- Dependency Install ---
+        // --- Install Dependencies ---
         stage("Install Dependencies") {
             steps {
                 dir('src/emailservice') {
-                    sh "pip install -r requirements.txt"
+                    sh 'pip3 install -r requirements.txt'
                 }
             }
         }
@@ -81,7 +81,7 @@ pipeline {
         stage("Unit Tests") {
             steps {
                 dir('src/emailservice') {
-                    sh "pytest --junitxml=test-results/results.xml || true"
+                    sh 'pytest --junitxml=test-results/results.xml || true'
                 }
             }
             post {
@@ -91,19 +91,19 @@ pipeline {
             }
         }
 
-        // --- Dependency Scan (Safety) ---
+        // --- Safety Dependency Scan ---
         stage("Safety Dependency Scan") {
             steps {
                 dir('src/emailservice') {
                     sh '''
-                    pip install safety
-                    safety check -r requirements.txt --json > safety-report.json || true
+                    pip3 install safety
+                    safety check -r requirements.txt --full-report > safety-report.txt || true
                     '''
                 }
             }
             post {
                 always {
-                    archiveArtifacts 'src/emailservice/safety-report.json'
+                    archiveArtifacts 'src/emailservice/safety-report.txt'
                 }
             }
         }
@@ -113,7 +113,8 @@ pipeline {
             steps {
                 dir('src/emailservice') {
                     sh '''
-                    trivy fs . --severity CRITICAL,HIGH --exit-code 1 --scanners vuln,misconfig,secret > trivy-fs-report.txt || true
+                    trivy fs . --severity CRITICAL,HIGH --exit-code 1 \
+                      --scanners vuln,misconfig,secret > trivy-fs-report.txt || true
                     '''
                 }
             }
@@ -172,13 +173,13 @@ pipeline {
         }
     }
 
-    // --- Final Notifications ---
+    // --- Notifications ---
     post {
         always {
             dir('src/emailservice') {
                 script {
                     def buildStatus = currentBuild.currentResult
-                    def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: ' Github User'
+                    def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github User'
 
                     emailext (
                         subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -194,7 +195,7 @@ pipeline {
                         to: 'harishn662@gmail.com',
                         from: 'harishn662@gmail.com',
                         mimeType: 'text/html',
-                        attachmentsPattern: 'bandit-report.json,safety-report.json,trivy-fs-report.txt,trivy-image-email.*'
+                        attachmentsPattern: 'bandit-report.json,safety-report.txt,trivy-fs-report.txt,trivy-image-email.*'
                     )
                 }
             }
