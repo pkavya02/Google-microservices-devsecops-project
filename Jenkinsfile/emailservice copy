@@ -1,9 +1,9 @@
 pipeline {
     agent any
 
-    tools {
-        python 'python3.10'   // <-- configure this in Jenkins Global Tool Config
-    }
+    // tools {
+    //     python 'python3'   // Configure Python in Jenkins global tools (Python 3.x)
+    // }
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
@@ -27,7 +27,6 @@ pipeline {
             steps {
                 dir('src/emailservice') {
                     sh '''
-                    python3 -m pip install --upgrade pip
                     pip install --quiet bandit
                     bandit -r . -f json -o bandit-report.json || true
                     '''
@@ -40,7 +39,7 @@ pipeline {
             }
         }
 
-        // --- SAST: SonarQube for Python ---
+        // --- SonarQube Analysis ---
         stage("SonarQube Analysis") {
             steps {
                 dir('src/emailservice') {
@@ -50,7 +49,9 @@ pipeline {
                           -Dsonar.projectKey=emailservice \
                           -Dsonar.projectName=emailservice \
                           -Dsonar.sources=. \
-                          -Dsonar.language=py
+                          -Dsonar.language=py \
+                          -Dsonar.python.version=3 \
+                          -Dsonar.externalIssuesReportPaths=bandit-report.json
                         '''
                     }
                 }
@@ -68,7 +69,7 @@ pipeline {
             }
         }
 
-        // --- Dependency Install ---
+        // --- Install Dependencies ---
         stage("Install Dependencies") {
             steps {
                 dir('src/emailservice') {
@@ -77,16 +78,19 @@ pipeline {
             }
         }
 
-        // --- Unit Tests ---
+        // --- Unit Tests + Coverage ---
         stage("Unit Tests") {
             steps {
                 dir('src/emailservice') {
-                    sh "pytest --junitxml=test-results/results.xml || true"
+                    sh '''
+                    pip install pytest pytest-cov
+                    pytest --junitxml=test-results/results.xml --cov=. || true
+                    '''
                 }
             }
             post {
                 always {
-                    junit 'src/emailservice/test-results/*.xml'
+                    junit 'src/emailservice/test-results/results.xml' || true
                 }
             }
         }
@@ -97,7 +101,7 @@ pipeline {
                 dir('src/emailservice') {
                     sh '''
                     pip install safety
-                    safety check -r requirements.txt --json > safety-report.json || true
+                    safety check --full-report --json > safety-report.json || true
                     '''
                 }
             }
@@ -194,7 +198,7 @@ pipeline {
                         to: 'harishn662@gmail.com',
                         from: 'harishn662@gmail.com',
                         mimeType: 'text/html',
-                        attachmentsPattern: 'bandit-report.json,safety-report.json,trivy-fs-report.txt,trivy-image-email.*'
+                        attachmentsPattern: 'bandit-report.json,safety-report.json,trivy-fs-report.txt,trivy-image-email.json,trivy-image-email.txt'
                     )
                 }
             }
