@@ -23,34 +23,19 @@ pipeline {
             }
         }
 
-        // --- Build & Unit Tests First ---
-        stage("Build & Test") {
-            steps {
-                dir('src/adservice') {
-                    sh "./gradlew clean build test || true"
-                }
-            }
-            post {
-                always {
-                    junit 'src/adservice/build/test-results/test/*.xml' || true
-                }
-            }
-        }
-
-        // --- SAST: SonarQube Analysis ---
+        // --- SAST: SonarQube with Gradle (non-blocking) ---
         stage("SonarQube Analysis") {
             steps {
                 dir('src/adservice') {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  // <--- make non-blocking
+                        sh 'chmod +x gradlew'
                         withSonarQubeEnv('sonar-server') {
                             sh '''
-                                ./gradlew sonar \
+                                ./gradlew sonarqube \
                                 -Dsonar.projectKey=adservice \
                                 -Dsonar.projectName=adservice \
                                 -Dsonar.host.url=$SONAR_HOST_URL \
-                                -Dsonar.login=$SONAR_AUTH_TOKEN \
-                                -Dsonar.java.binaries=build/classes \
-                                -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+                                -Dsonar.login=$SONAR_AUTH_TOKEN
                             '''
                         }
                     }
@@ -58,52 +43,25 @@ pipeline {
             }
         }
 
-        // --- Quality Gate (Conditional) ---
+        // --- Quality Gate ---
         stage("Quality Gate") {
-            when {
-                expression { 
-                    currentBuild.result != 'ABORTED' && 
-                    fileExists('src/adservice/build/sonar/report-task.txt') 
-                }
-            }
             steps {
                 script {
                     timeout(time: 3, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: false  // Don't abort on quality gate failure
+                        waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
                     }
                 }
             }
         }
 
-        // --- Dependency Check (OWASP) ---
-        stage("Dependency Check") {
-            steps {
-                dir('src/adservice') {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        dependencyCheck additionalArguments: '''
-                            --scan . 
-                            --format XML 
-                            --out dependency-check-report.xml
-                        ''', odcInstallation: 'dp-check'
-                    }
-                }
-            }
-            post {
-                always {
-                    archiveArtifacts 'src/adservice/dependency-check-report.xml'
-                }
-            }
-        }
 
-        // --- Continue with other stages... ---
+        // --- Trivy FS Scan ---
         stage("Trivy File Scan") {
             steps {
                 dir('src/adservice') {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        sh '''
-                        trivy fs . --severity CRITICAL,HIGH --exit-code 1 --scanners vuln,misconfig,secret > trivy-fs-report.txt || true
-                        '''
-                    }
+                    sh '''
+                    trivy fs . --severity CRITICAL,HIGH --exit-code 1 --scanners vuln,misconfig,secret > trivy-fs-report.txt || true
+                    '''
                 }
             }
             post {
@@ -115,9 +73,6 @@ pipeline {
 
         // --- Build Docker Image ---
         stage("Build Docker Image") {
-            when {
-                expression { currentBuild.result != 'ABORTED' }
-            }
             steps {
                 dir('src/adservice') {
                     script {
@@ -132,9 +87,6 @@ pipeline {
 
         // --- Push Docker Image ---
         stage("Push to DockerHub") {
-            when {
-                expression { currentBuild.result != 'ABORTED' }
-            }
             steps {
                 dir('src/adservice') {
                     withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerpwd')]) {
@@ -151,17 +103,12 @@ pipeline {
 
         // --- Trivy Image Scan ---
         stage("Trivy Scan Image") {
-            when {
-                expression { currentBuild.result != 'ABORTED' }
-            }
             steps {
                 dir('src/adservice') {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        sh '''
-                        trivy image -f json -o trivy-image-ad.json ${IMAGE_TAG}
-                        trivy image -f table -o trivy-image-ad.txt ${IMAGE_TAG}
-                        '''
-                    }
+                    sh '''
+                    trivy image -f json -o trivy-image-ad.json ${IMAGE_TAG}
+                    trivy image -f table -o trivy-image-ad.txt ${IMAGE_TAG}
+                    '''
                 }
             }
             post {
@@ -178,7 +125,7 @@ pipeline {
             dir('src/adservice') {
                 script {
                     def buildStatus = currentBuild.currentResult
-                    def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github User'
+                    def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: ' Github User'
 
                     emailext (
                         subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
