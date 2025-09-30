@@ -44,6 +44,7 @@ pipeline {
         // --- Quality Gate ---
         stage("Quality Gate") {
             steps {
+                dir('src/cartservice') {
                 script {
                     timeout(time: 3, unit: 'MINUTES') {
                         waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
@@ -51,7 +52,7 @@ pipeline {
                 }
             }
         }
-
+        }
         // --- Build & Unit Tests ---
         stage("Build & Test") {
             steps {
