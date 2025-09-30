@@ -23,6 +23,35 @@ pipeline {
             }
         }
 
+        // --- Build & Unit Tests (Moved before SonarQube to generate coverage) ---
+        stage("Build & Test (Generate Coverage)") {
+            steps {
+                dir('src/cartservice') {
+                    sh '''
+                    # Restore packages
+                    dotnet restore
+                    # Build the main project
+                    dotnet build --no-incremental src/cartservice.csproj
+                    # Run tests and generate coverage report in Cobertura format
+                    # Assumes coverlet.collector is referenced in the test project
+                    dotnet test tests/cartservice.tests.csproj \
+                        --collect "Cobertura" \
+                        --logger "trx" \
+                        /p:CollectCoverage=true \
+                        /p:CoverletOutputFormat=cobertura \
+                        /p:CoverletOutput=./TestResults/coverage/cobertura.xml
+                    '''
+                }
+            }
+            post {
+                always {
+                    // Archive Test Results and Coverage Report for later processing/reporting
+                    archiveArtifacts artifacts: 'src/cartservice/tests/TestResults/**/*.trx'
+                    archiveArtifacts artifacts: 'src/cartservice/tests/TestResults/coverage/cobertura.xml', allowEmpty: true
+                }
+            }
+        }
+
         // --- SAST: SonarQube for C# ---
         stage("SonarQube Analysis") {
             steps {
@@ -32,8 +61,15 @@ pipeline {
                         dotnet tool install --global dotnet-sonarscanner || true
                         export PATH="$PATH:$HOME/.dotnet/tools"
 
-                        dotnet sonarscanner begin /k:"cartservice" /d:sonar.host.url=$SONAR_HOST_URL /d:sonar.login=$SONAR_AUTH_TOKEN
-                        dotnet build
+                        # Begin SonarScanner with parameters including coverage report
+                        # Path for coverage report is relative to the directory where 'dotnet test' ran (tests/TestResults/...)
+                        dotnet sonarscanner begin \
+                            /k:"cartservice" \
+                            /d:sonar.host.url=$SONAR_HOST_URL \
+                            /d:sonar.login=$SONAR_AUTH_TOKEN \
+                            /d:sonar.cs.opencover.reportsPaths="tests/TestResults/*/coverage/cobertura.xml"
+                            
+                        dotnet build src/cartservice.csproj
                         dotnet sonarscanner end /d:sonar.login=$SONAR_AUTH_TOKEN
                         '''
                     }
@@ -45,22 +81,9 @@ pipeline {
         stage("Quality Gate") {
             steps {
                 script {
-                    timeout(time: 3, unit: 'MINUTES') {
+                    timeout(time: 5, unit: 'MINUTES') { // Increased timeout for safety
                         waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
                     }
-                }
-            }
-        }
-
-        // --- Build & Unit Tests ---
-        stage("Build & Test") {
-            steps {
-                dir('src/cartservice') {
-                    sh '''
-                    dotnet restore
-                    dotnet build --no-incremental
-                    dotnet test --logger:trx
-                    '''
                 }
             }
         }
@@ -89,7 +112,8 @@ pipeline {
             steps {
                 dir('src/cartservice') {
                     sh '''
-                    trivy fs . --severity CRITICAL,HIGH --exit-code 1 --scanners vuln,misconfig,secret > trivy-fs-report.txt || true
+                    # Setting exit-code 0 and piping output to file, then check file size for real pass/fail later if needed
+                    trivy fs . --severity CRITICAL,HIGH --exit-code 0 --scanners vuln,misconfig,secret > trivy-fs-report.txt
                     '''
                 }
             }
@@ -103,12 +127,12 @@ pipeline {
         // --- Build Docker Image ---
         stage("Build Docker Image") {
             steps {
-                dir('src/cartservice/src') {
+                dir('src/cartservice') { // Changed base dir to src/cartservice
                     script {
                         env.IMAGE_TAG = "$DOCKER_NAME:${BUILD_NUMBER}"
                         sh "docker rmi -f $IMAGE_NAME ${env.IMAGE_TAG} || true"
-                        sh "docker build -t $IMAGE_NAME ."
-                        
+                        // Build context is src/cartservice, Dockerfile is src/cartservice/src/Dockerfile
+                        sh "docker build -t $IMAGE_NAME -f src/Dockerfile ." 
                     }
                 }
             }
@@ -117,7 +141,7 @@ pipeline {
         // --- Push Docker Image ---
         stage("Push to DockerHub") {
             steps {
-                dir('src/cartservice') {
+                dir('src/cartservice') { // Run from the base directory
                     withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerpwd')]) {
                             sh "docker login -u harishnshetty -p ${dockerpwd}"
                             sh "docker tag $IMAGE_NAME ${env.IMAGE_TAG}"
