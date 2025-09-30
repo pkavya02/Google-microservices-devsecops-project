@@ -27,20 +27,15 @@ pipeline {
         stage("SonarQube Analysis") {
             steps {
                 dir('src/cartservice') {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        withSonarQubeEnv('sonar-server') {
-                            sh '''
-                            chmod +x gradlew
+                    withSonarQubeEnv('sonar-server') {
+                        sh '''
+                        dotnet tool install --global dotnet-sonarscanner || true
+                        export PATH="$PATH:$HOME/.dotnet/tools"
 
-                            # Apply sonarqube plugin at runtime if not applied in build.gradle
-                            # This avoids "Task 'sonarqube' not found" error
-                            ./gradlew --init-script <(echo "initscript { dependencies { classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.5.0.2730' } }; allprojects { apply plugin: 'org.sonarqube' }") sonarqube \
-                                -Dsonar.projectKey=cartservice \
-                                -Dsonar.projectName=cartservice \
-                                -Dsonar.host.url=$SONAR_HOST_URL \
-                                -Dsonar.login=$SONAR_AUTH_TOKEN
-                            '''
-                        }
+                        dotnet sonarscanner begin /k:"cartservice" /d:sonar.host.url=$SONAR_HOST_URL /d:sonar.login=$SONAR_AUTH_TOKEN
+                        dotnet build
+                        dotnet sonarscanner end /d:sonar.login=$SONAR_AUTH_TOKEN
+                        '''
                     }
                 }
             }
@@ -183,4 +178,4 @@ pipeline {
             }
         }
     }
-}
+} 
