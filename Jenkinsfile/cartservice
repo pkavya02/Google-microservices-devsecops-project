@@ -26,7 +26,7 @@ pipeline {
         // --- SAST: SonarQube for C# ---
         stage("SonarQube Analysis") {
             steps {
-                dir('src/adservice') {
+                dir('src/cartservice') {
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         withSonarQubeEnv('sonar-server') {
                             sh '''
@@ -35,8 +35,8 @@ pipeline {
                             # Apply sonarqube plugin at runtime if not applied in build.gradle
                             # This avoids "Task 'sonarqube' not found" error
                             ./gradlew --init-script <(echo "initscript { dependencies { classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.5.0.2730' } }; allprojects { apply plugin: 'org.sonarqube' }") sonarqube \
-                                -Dsonar.projectKey=adservice \
-                                -Dsonar.projectName=adservice \
+                                -Dsonar.projectKey=cartservice \
+                                -Dsonar.projectName=cartservice \
                                 -Dsonar.host.url=$SONAR_HOST_URL \
                                 -Dsonar.login=$SONAR_AUTH_TOKEN
                             '''
