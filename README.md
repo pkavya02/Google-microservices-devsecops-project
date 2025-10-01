@@ -197,12 +197,7 @@ trivy --version
 - OWASP Dependency-Check Plugin
 - Pipeline: Stage View Plugin
 - SonarQube Scanner for Jenkins
-- Prometheus metrics plugin
-- Docker API Plugin
-- Docker Commons Plugin
-- Docker Pipeline
-- Docker plugin
-- docker-build-step
+
 
 ---
 ## SonarQube Docker Container Run for Analysis
