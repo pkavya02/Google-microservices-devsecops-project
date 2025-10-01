@@ -1,7 +1,5 @@
-# Maven Spring-boot Monorepo Mini Project + Self-Host Runner Via Shell 
-
 ## Self Build Project
-
+aa
 ## For more projects, check out  
 [https://harishnshetty.github.io/projects.html](https://harishnshetty.github.io/projects.html)
 
@@ -14,8 +12,7 @@ web-based e-commerce app where users can browse items, add them to the cart, and
 
 ## Architecture
 
-**Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC.
+
 
 [![Architecture of
 microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
