@@ -11,10 +11,7 @@
 web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
 
 
-
 ## Architecture
-
-
 
 [![Architecture of
 microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
@@ -187,6 +184,18 @@ sudo apt-get install -y trivy
 trivy --version
 ```
 
+## Python Package Installation
+```bash
+sudo apt-get update
+sudo apt install python3-venv -y
+sudo apt-get install -y python3 python3-pip
+sudo -i
+pip3 install --upgrade pip
+pip3 install bandit safety
+```
+```bash
+sudo pip3 install bandit
+```
 ---
 
 ## Jenkins Plugins to Install
@@ -212,7 +221,7 @@ docker run -d --name sonarqube \
   -v sonarqube_data:/opt/sonarqube/data \
   -v sonarqube_logs:/opt/sonarqube/logs \
   -v sonarqube_extensions:/opt/sonarqube/extensions \
-  sonarqube:lts-community
+  Sonarqube:25.9.0.112764-community
 ```
 
 ---
