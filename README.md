@@ -197,6 +197,10 @@ trivy --version
 - OWASP Dependency-Check Plugin
 - Pipeline: Stage View Plugin
 - SonarQube Scanner for Jenkins
+- Go
+- dotnet SDK
+-Sandgin Python
+
 
 
 ---
