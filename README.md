@@ -198,7 +198,7 @@ trivy --version
 - Pipeline: Stage View Plugin
 - SonarQube Scanner for Jenkins
 - Go
-- dotnet SDK
+- Dotnet SDK
 -Sandgin Python
 
 
@@ -232,14 +232,13 @@ Webhook example:
 
 ## Jenkins Tools Configuration
 
-- JDK
+- JDK [jdk17 , jdk21 ]
 - SonarQube Scanner installations [sonar-scanner]
-- Node
+- Node [ node16 , node20 ]
 - Dependency-Check installations [dp-check]
 - Maven installations
-
-- Docker installations
-
+- Go [ go1.25 ]
+- dotnetsdk [ dotnet9 ]
 ---
 
 ## Jenkins System Configuration
