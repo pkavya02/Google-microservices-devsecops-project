@@ -1,7 +1,11 @@
-<!-- <p align="center">
-<img src="/src/frontend/static/icons/Hipster_HeroLogoMaroon.svg" width="300" alt="Online Boutique" />
-</p> -->
-![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
+# Maven Spring-boot Monorepo Mini Project + Self-Host Runner Via Shell 
+
+## Self Build Project
+
+## For more projects, check out  
+[https://harishnshetty.github.io/projects.html](https://harishnshetty.github.io/projects.html)
+
+[![Video Tutorial](https://github.com/harishnshetty/image-data-project/blob/697a14a6f3bca7222218317e87d705e3fbe04f31/monorepo-java.jpg)](https://youtu.be/Pd5_8oyD4ME)
 
 **Online Boutique** is a cloud-first microservices demo application.  The application is a
 web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
@@ -16,7 +20,6 @@ languages that talk to each other over gRPC.
 [![Architecture of
 microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
 
-Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 
 | Service                                              | Language      | Description                                                                                                                       |
 | ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
