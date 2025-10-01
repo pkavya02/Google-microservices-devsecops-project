@@ -28,7 +28,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: harishnshetty/emailservice:7
+        image: harishnshetty/emailservice:latest
         ports:
         - containerPort: 8080
         env:
@@ -143,7 +143,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: harishnshetty/recommendationservice:3
+        image: harishnshetty/recommendationservice:latest
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -299,7 +299,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: harishnshetty/paymentservice:3
+        image: harishnshetty/paymentservice:latest
         ports:
         - containerPort: 50051
         env:
