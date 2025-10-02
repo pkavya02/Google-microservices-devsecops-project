@@ -207,8 +207,9 @@ sudo pip3 install bandit
 - Pipeline: Stage View Plugin
 - SonarQube Scanner for Jenkins
 - Go
-- Dotnet SDK
--Sandgin Python
+- .NET SDK Support
+
+
 
 
 
@@ -221,7 +222,7 @@ docker run -d --name sonarqube \
   -v sonarqube_data:/opt/sonarqube/data \
   -v sonarqube_logs:/opt/sonarqube/logs \
   -v sonarqube_extensions:/opt/sonarqube/extensions \
-  Sonarqube:25.9.0.112764-community
+  sonarqube:25.9.0.112764-community
 ```
 
 ---
@@ -245,16 +246,19 @@ Webhook example:
 - SonarQube Scanner installations [sonar-scanner]
 - Node [ node16 , node20 ]
 - Dependency-Check installations [dp-check]
-- Maven installations
 - Go [ go1.25 ]
-- dotnetsdk [ dotnet9 ]
+- .NET SDK installations [ dotnet9 ]
+  | .NET 9.0 - Status Unknown (end of support: 2026-11-10) |
+  |9.0.9, released 2025-09-09 |
+  |9.0.305|
+  |linux-x64 (Linux - x64)|
 ---
 
 ## Jenkins System Configuration
 
 **SonarQube servers:**   
 - Name: sonar-server  
-- URL: http://<sonar-ip-address>:9000  
+- URL: http://sonar-ip-address:9000  
 - Credentials: Add from Jenkins credentials
 
 **Extended E-mail Notification:**

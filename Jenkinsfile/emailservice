@@ -29,8 +29,20 @@ pipeline {
             steps {
                 dir('src/emailservice') {
                     sh '''
-                    python3 -m pip install --user --upgrade bandit
+                    # Create and activate a virtual environment
+                    python3 -m venv venv
+                    . venv/bin/activate
+
+                    # Upgrade pip inside venv
+                    pip install --upgrade pip
+
+                    # Install Bandit inside the venv
+                    pip install bandit
+
+                    # Run Bandit scan (ignore non-zero exit so pipeline continues)
                     bandit -r . -f json -o bandit-report.json || true
+
+                    deactivate
                     '''
                 }
             }
