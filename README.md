@@ -185,12 +185,28 @@ trivy --version
 ```
 
 ## Python Package Installation
+
+```bash
+# 1. Update package list
+sudo apt update
+
+# 2. Install required dependencies for adding a new Python version
+sudo apt install -y software-properties-common
+
+# 3. Add the deadsnakes PPA (Personal Package Archive) to get newer Python versions
+sudo add-apt-repository ppa:deadsnakes/ppa
+
+# 4. Install the specific version of Python you want
+sudo apt install -y python3.10 python3.10-venv python3.10-dev
+```
+
 ```bash
 sudo apt-get update
 sudo apt install python3-venv -y
 sudo apt-get install -y python3 python3-pip
-sudo pip3 install --break-system-packages --upgrade pip
-sudo pip3 install --break-system-packages bandit safety
+sudo -i
+pip3 install --upgrade pip
+pip3 install bandit safety
 ```
 ```bash
 sudo pip3 install bandit
