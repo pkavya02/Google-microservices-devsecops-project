@@ -59,9 +59,20 @@ microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagr
 
 ## Prerequisites
 
+- Instance Type :- c5.xlarge
 This guide assumes an Ubuntu/Debian-like environment and sudo privileges.
 
 ---
+
+## Ports to Enable in Security Group
+
+| Service         | Port  |
+|-----------------|-------|
+| HTTP            | 80    |
+| HTTPS           | 443   |
+| SSH             | 22    |
+| Jenkins         |       |
+| SonarQube       |       |
 
 ## System Update & Common Packages
 
@@ -184,7 +195,7 @@ sudo apt-get install -y trivy
 trivy --version
 ```
 
-## Python Package Installation
+## Python Package Installation in the Amazon Ubuntu Ami Image [ Preinstalled 3.12 ]
 
 ```bash
 # 1. Update package list
@@ -194,22 +205,30 @@ sudo apt update
 sudo apt install -y software-properties-common
 
 # 3. Add the deadsnakes PPA (Personal Package Archive) to get newer Python versions
-sudo add-apt-repository ppa:deadsnakes/ppa
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt update
 
 # 4. Install the specific version of Python you want
-sudo apt install -y python3.10 python3.10-venv python3.10-dev
-```
+sudo apt install -y python3.10 python3.10-venv python3.10-distutils python3.10-dev
 
+curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python3.10
+
+
+ls /usr/bin/python3*
+
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 2
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+
+
+sudo update-alternatives --config python3
+
+```
+## Choose python3.10 for Jenkins pipeline.
+
+## If your using the Plan VM
 ```bash
 sudo apt-get update
-sudo apt install python3-venv -y
-sudo apt-get install -y python3 python3-pip
-sudo -i
-pip3 install --upgrade pip
-pip3 install bandit safety
-```
-```bash
-sudo pip3 install bandit
+sudo apt install -y python3.10 python3.10-venv python3.10-distutils python3.10-dev
 ```
 ---
 
@@ -223,8 +242,7 @@ sudo pip3 install bandit
 - SonarQube Scanner for Jenkins
 - Go
 - .NET SDK Support
-
-
+- Python Pyenv
 
 
 
@@ -293,7 +311,7 @@ Webhook example:
 - Reply-To Address: example@gmail.com
 
 ---
-# Now See the configuration pipeline of the jenkins
+# Now See the configuration pipeline of the Jenkins
 
 
 
