@@ -83,23 +83,19 @@ pipeline {
         // --- Install Dependencies ---
         stage("Install Dependencies") {
             steps {
-                dir("src/emailservice") {
-                    sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    '''
+                dir('src/emailservice') {
+                    sh 'python3 -m pip install --user -r requirements.txt || true'
                 }
             }
         }
-
 
         // --- Dependency Scan (Safety) ---
         stage("Safety Dependency Scan") {
             steps {
                 dir('src/emailservice') {
                     sh '''
+                    python3 -m venv venv
+                   . venv/bin/activate
                     python3 -m pip install --user safety
                     safety check --full-report --output json > safety-report.json || true
                     '''
