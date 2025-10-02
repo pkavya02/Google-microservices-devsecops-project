@@ -5,7 +5,7 @@
 ## For more projects, check out  
 [https://harishnshetty.github.io/projects.html](https://harishnshetty.github.io/projects.html)
 
-[![Video Tutorial](https://github.com/harishnshetty/image-data-project/blob/5d2e06ffa3dd7687607b0c7d4892a6b161c077f9/10%20microservice%20online%20shop%20project.jpg)](https://youtu.be/Pd5_8oyD4ME)
+[![Video Tutorial](https://github.com/harishnshetty/image-data-project/blob/5d2e06ffa3dd7687607b0c7d4892a6b161c077f9/10%20microservice%20online%20shop%20project.jpg)](https://youtu.be/KNH_qe1vJAg)
 
 **Online Boutique** is a cloud-first microservices demo application.  The application is a
 web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
@@ -14,7 +14,7 @@ web-based e-commerce app where users can browse items, add them to the cart, and
 ## Architecture
 
 [![Architecture of
-microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
+microservices](/docs/img/architecture-diagram.png)](https://youtu.be/KNH_qe1vJAg)
 
 
 | Service                                              | Language      | Description                                                                                                                       |
