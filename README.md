@@ -189,9 +189,8 @@ trivy --version
 sudo apt-get update
 sudo apt install python3-venv -y
 sudo apt-get install -y python3 python3-pip
-sudo -i
-pip3 install --upgrade pip
-pip3 install bandit safety
+sudo pip3 install --break-system-packages --upgrade pip
+sudo pip3 install --break-system-packages bandit safety
 ```
 ```bash
 sudo pip3 install bandit
