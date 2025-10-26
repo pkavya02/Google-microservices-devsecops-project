@@ -32,9 +32,9 @@ pipeline {
                         dotnet tool install --global dotnet-sonarscanner || true
                         export PATH="$PATH:$HOME/.dotnet/tools"
 
-                        dotnet sonarscanner begin /k:"cartservice" /d:sonar.host.url=$SONAR_HOST_URL /d:sonar.login=$SONAR_AUTH_TOKEN
+                        dotnet sonarscanner begin /k:"cartservice" /d:sonar.host.url="http://54.83.159.165:9000" /d:sonar.login="${SONAR_AUTH_TOKEN}"
                         dotnet build
-                        dotnet sonarscanner end /d:sonar.login=$SONAR_AUTH_TOKEN
+                        dotnet sonarscanner end /d:sonar.login="${SONAR_AUTH_TOKEN}"
                         '''
                     }
                 }
