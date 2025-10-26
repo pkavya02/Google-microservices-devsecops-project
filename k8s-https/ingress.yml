@@ -15,7 +15,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: shop.harishshetty.xyz
+    - host: ""
       http:
         paths:
           - path: /
